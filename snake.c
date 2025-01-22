@@ -51,20 +51,20 @@ void snk_move(struct snake *snk, char (*pol)[GAME_POL_LEN], short dx, short dy) 
         // Увеличение длины змейки
         snk->len++;
         if (snk->len > SNK_MAX_LEN) {
-            printf("You win! Snake reached max length.\n");
+            printf("You win!\n");
             exit(0);
         }
         // Респавн яблока
         spawn_apple(pol);
     }
     // Проверка столкновения со стенами
-    if (pol[snk->x[0]][snk->y[0]] == '#' || pol[snk->x[0]][snk->y[0]] == '0') {
-        printf("Game Over! Snake hit the wall.\n");
+    if (pol[snk->x[0]][snk->y[0]] == '#' || pol[snk->x[0]][snk->y[0]] == '@') {
+        printf("Game Over!\n");
         exit(0);
     }
     // Обновление поля
     for (short i = 0; i < snk->len; ++i) {
-        pol[snk->x[i]][snk->y[i]] = (i == 0) ? '@' : '0';
+        pol[snk->x[i]][snk->y[i]] = (i == 0) ? '@' : '@';
     }
 }
 
@@ -109,6 +109,7 @@ int main() {
             case S: snk_move(&snk, pol, 1, 0); break;
             case D: snk_move(&snk, pol, 0, 1); break;
         }
+        printf("Snake length: %d", snk.len);
         Sleep(200); // Задержка
     }
     return 0;
