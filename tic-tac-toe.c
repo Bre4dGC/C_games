@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <windows.h>
 
 #define POL_LEN 3
 
@@ -18,6 +19,7 @@ void win_check(char (*pol)[POL_LEN], bool *is_game_active) {
             (pol[0][i] == pol[1][i] && pol[1][i] == pol[2][i] && pol[0][i] != ' ')) { // столбцы
             printf("Победил игрок %c!\n", pol[i][i]);
             *is_game_active = false;
+            draw_pol(pol);            
             return;
         }
     }
@@ -26,6 +28,7 @@ void win_check(char (*pol)[POL_LEN], bool *is_game_active) {
         (pol[0][2] == pol[1][1] && pol[1][1] == pol[2][0] && pol[0][2] != ' ')) {
         printf("Победил игрок %c!\n", pol[1][1]);
         *is_game_active = false;
+        draw_pol(pol);
         return;
     }
     // Проверка на ничью
@@ -42,6 +45,7 @@ void win_check(char (*pol)[POL_LEN], bool *is_game_active) {
     if (is_draw) {
         printf("Ничья!\n");
         *is_game_active = false;
+        draw_pol(pol);
     }
 }
 
@@ -57,9 +61,9 @@ void pl_move(char (*pol)[POL_LEN], const char ch) {
             while (getchar() != '\n');
             continue;
         }
-        if (x >= 0 && x < POL_LEN && y >= 0 && y < POL_LEN) {
-            if (pol[y][x] != 'X' && pol[y][x] != 'O') {
-                pol[y][x] = ch;
+        if (x >= 0 && x <= POL_LEN && y >= 0 && y <= POL_LEN) {
+            if (pol[y-1][x-1] != 'X' && pol[y-1][x-1] != 'O') {
+                pol[y-1][x-1] = ch;
                 break;
             } else {
                 printf("Клетка занята. Выберите другую.\n");
@@ -72,16 +76,16 @@ void pl_move(char (*pol)[POL_LEN], const char ch) {
 
 int main() {
     char pol[POL_LEN][POL_LEN] = {
-        {' ', ' ', ' '},
-        {' ', ' ', ' '},
-        {' ', ' ', ' '}
+        {' ',' ',' '},
+        {' ',' ',' '},
+        {' ',' ',' '}
     };
     bool is_game_active = true;
     while (is_game_active) {
+        system("cls");
         pl_move(pol, 'X');
         win_check(pol, &is_game_active);
         if (!is_game_active) break;
-
         pl_move(pol, 'O');
         win_check(pol, &is_game_active);
     }

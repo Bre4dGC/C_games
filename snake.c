@@ -10,67 +10,73 @@
 typedef enum {W, A, S, D} KEYS; // Клавиши управления
 
 // Змейка
-struct snake {
+typedef struct {
     short x[SNK_MAX_LEN];
     short y[SNK_MAX_LEN];
     short len;
-};
+} Snake;
 
-void draw_pol(char (*pol)[GAME_POL_LEN]) {
+// Яблоко
+typedef struct {
+    short x;
+    short y;
+} Apple;
+
+void draw_pol(char (*pole)[GAME_POL_LEN]) {
     system("cls"); // Очистка экрана
     for (short i = 0; i < GAME_POL_LEN; ++i) {
         for (short j = 0; j < GAME_POL_LEN; ++j) {
-            putchar(pol[i][j]);
+            putchar(pole[i][j]);
         }
         putchar('\n');
     }
 }
 
-void spawn_apple(char (*pol)[GAME_POL_LEN]) {
-    short x, y;
+void spawn_apple(char (*pole)[GAME_POL_LEN]) {
+    Apple apple;
     do {
-        x = rand() % (GAME_POL_LEN - 2) + 1;
-        y = rand() % (GAME_POL_LEN - 2) + 1;
-    } while (pol[x][y] != ' '); // Ищет свободную клетку
-    pol[x][y] = '+';
+        apple.x = rand() % (GAME_POL_LEN - 2) + 1;
+        apple.y = rand() % (GAME_POL_LEN - 2) + 1;
+    } while (pole[apple.x][apple.y] != ' '); // Ищет свободную клетку
+    pole[apple.x][apple.y] = '+';
 }
 
-void snk_move(struct snake *snk, char (*pol)[GAME_POL_LEN], short dx, short dy) {
+void snk_move(Snake *snake, char (*pole)[GAME_POL_LEN], short dx, short dy) {
     // Стирает хвост с поля
-    pol[snk->x[snk->len - 1]][snk->y[snk->len - 1]] = ' ';
+    pole[snake->x[snake->len - 1]][snake->y[snake->len - 1]] = ' ';
     // Перемещение тела змейки
-    for (short i = snk->len - 1; i > 0; --i) {
-        snk->x[i] = snk->x[i - 1];
-        snk->y[i] = snk->y[i - 1];
+    for (short i = snake->len - 1; i > 0; --i) {
+        snake->x[i] = snake->x[i - 1];
+        snake->y[i] = snake->y[i - 1];
     }
     // Обновление позиции головы
-    snk->x[0] += dx;
-    snk->y[0] += dy;
+    snake->x[0] += dx;
+    snake->y[0] += dy;
     // Проверка столкновения с яблоком
-    if (pol[snk->x[0]][snk->y[0]] == '+') {
+    if (pole[snake->x[0]][snake->y[0]] == '+') {
         // Увеличение длины змейки
-        snk->len++;
-        if (snk->len > SNK_MAX_LEN) {
+        snake->len++;
+        if (snake->len > SNK_MAX_LEN) {
             printf("You win!\n");
             exit(0);
         }
         // Респавн яблока
-        spawn_apple(pol);
+        spawn_apple(pole);
     }
     // Проверка столкновения со стенами
-    if (pol[snk->x[0]][snk->y[0]] == '#' || pol[snk->x[0]][snk->y[0]] == '@') {
+    if (pole[snake->x[0]][snake->y[0]] == '#' || pole[snake->x[0]][snake->y[0]] == '@') {
         printf("Game Over!\n");
         exit(0);
     }
     // Обновление поля
-    for (short i = 0; i < snk->len; ++i) {
-        pol[snk->x[i]][snk->y[i]] = (i == 0) ? '@' : '@';
+    for (short i = 0; i < snake->len; ++i) {
+        pole[snake->x[i]][snake->y[i]] = (i == 0) ? '@' : '@';
     }
 }
 
 int main() {
     srand(time(NULL));
-    char pol[GAME_POL_LEN][GAME_POL_LEN] = {
+    char pole[GAME_POL_LEN][GAME_POL_LEN] = {
         "###############",
         "#             #",
         "#             #",
@@ -86,12 +92,12 @@ int main() {
         "#             #",
         "###############"
     };
-    struct snake snk = {.x = 5, .y = 5, .len = 1};
-    pol[snk.x[0]][snk.y[0]] = '@';
-    spawn_apple(pol);
+    Snake snake = {.x = 5, .y = 5, .len = 1};
+    pole[snake.x[0]][snake.y[0]] = '@';
+    spawn_apple(pole);
     KEYS key;
     while (1) {
-        draw_pol(pol);
+        draw_pol(pole);
         // Чтение клавиш
         if (_kbhit()) {
             char input = _getch();
@@ -104,12 +110,12 @@ int main() {
         }
         // Движение змейки
         switch (key) {
-            case W: snk_move(&snk, pol, -1, 0); break;
-            case A: snk_move(&snk, pol, 0, -1); break;
-            case S: snk_move(&snk, pol, 1, 0); break;
-            case D: snk_move(&snk, pol, 0, 1); break;
+            case W: snk_move(&snake, pole,-1, 0); break;
+            case A: snk_move(&snake, pole, 0,-1); break;
+            case S: snk_move(&snake, pole, 1, 0); break;
+            case D: snk_move(&snake, pole, 0, 1); break;
         }
-        printf("Snake length: %d", snk.len);
+        printf("Snake length: %d", snake.len);
         Sleep(200); // Задержка
     }
     return 0;
